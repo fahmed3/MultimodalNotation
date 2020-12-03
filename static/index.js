@@ -1,30 +1,48 @@
-let textinput = document.getElementById("textinput");
+let form = document.getElementById("formid");
+let braille_sect = document.getElementById("brailleSection");
 let musicxml = "";
+let textinput = document.getElementById("textinput");
+let btn = document.getElementsByTagName("button")[0];
 
-var renderScore = function () {
-  let text_notation = textinput.value;
-  console.log("function worked: ", text_notation);
-};
+Mousetrap.bindGlobal('alt+r', function(e) {
+  btn.click();
+})
 
 var openSheetMusicDisplay = new opensheetmusicdisplay.OpenSheetMusicDisplay(
   "osmdContainer"
 );
 openSheetMusicDisplay.setOptions({
   backend: "svg",
-  drawTitle: true,
-  // drawingParameters: "compacttight" // don't display title, composer etc., smaller margins
+  drawingParameters: "compacttight", // don't display title, composer etc., smaller margins
 });
 
-fetch("/xmldata")
-  .then(function (response) {
-    return response.json();
-  })
-  .then(function (text) {
-    console.log("Response: ");
-    console.log(text);
-    musicxml = text.abcNotation;
-    openSheetMusicDisplay.load(musicxml).then(function () {
-      openSheetMusicDisplay.render();
-    });
-  })
-  .catch((e) => console.log(e));
+//ADD DOCUMENTATION TO GITHUB
+form.addEventListener("submit", (event) => {
+  let data = { userdata: textinput.value };
+  fetch("/data", {
+    method: "POST",
+    body: JSON.stringify(data),
+    headers: {
+      Accept: "application/json",
+      "Content-Type": "application/json",
+    },
+  }).then((res) => {
+    console.log("Request complete! response:", res);
+    fetch("/data")
+      .then(function (response) {
+        return response.json();
+      })
+      .then(function (response) {
+        musicxml = response["user_input"];
+        braille = response["braille"];
+        openSheetMusicDisplay.load(musicxml).then(function () {
+          openSheetMusicDisplay.render();
+        });
+
+        braille_sect.innerHTML = braille;
+      })
+      .catch((e) => console.log(e));
+  });
+
+  event.preventDefault();
+});

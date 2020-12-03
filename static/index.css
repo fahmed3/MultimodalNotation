@@ -1,0 +1,16 @@
+.home {
+  display: flex;
+  flex-direction: row;
+}
+
+form {
+  display: flex;
+}
+
+.braille {
+  padding: 0px 15px;
+}
+textarea {
+  width: 500px;
+  height: 300px;
+}

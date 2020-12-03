@@ -1,4 +1,4 @@
-from flask import Flask, render_template, url_for, request, jsonify, redirect
+from flask import Flask, render_template, url_for, request, jsonify, redirect, make_response
 from music21 import *
 from music21.braille import translate
 
@@ -11,38 +11,44 @@ K:none
 D,4 D,E,F,^G, z4 | E12 |] """
 
 txt = ""
+braille = ""
 
-abcTextSample = converter.parse(fragment) #parseData
-braille = translate.objectToBraille(abcTextSample)
-
-s1 = stream.Stream()
-s1.append(note.Note('C#4', type='half'))
-s1.append(note.Note('D5', type='quarter'))
-# for thisNote in s1.notes:
-#     print(thisNote.octave)
+# abcTextSample = converter.parse(fragment) #parseData
+# braille = translate.objectToBraille(abcTextSample)
 
 
 @app.route('/')
 def index():
-    return render_template('index.html')
+    return render_template('index.html', braille=braille)
 
 
-@app.route('/', methods=['POST'])
-def results():
-    global txt
-    txt = request.form['userinput']
-    abcTextSample = converter.parse(txt) #parseData
-    GEX = musicxml.m21ToXml.GeneralObjectExporter(abcTextSample)
-    out = GEX.parse()  # out is bytes
-    outStr = out.decode('utf-8')  # now is string
-    txt = outStr.strip()
-    # except:
-    #     txt = 'Converter was not able to parse, you inputted: "{}"'.format(txt)
-    return redirect(url_for('index'))
+@app.route("/data", methods=['GET', 'POST'])
+def getuserinput():
+    if request.method == 'GET':
+        data = {"user_input":txt, "braille": braille}
+        return jsonify(data)
+    # POST request
+    if request.method == 'POST':
+        data = request.get_json()['userdata']
+        convert_to_music_xml(data)
+        #print(request.json())  # parse as JSON
+        return 'Success', 200
 
-@app.route("/xmldata")
-def xml():
-    return jsonify({'abcNotation' : txt})
+
+def convert_to_music_xml(userinput):
+    try:
+        abcTextSample = converter.parse(userinput) #parseData
+        global braille
+        braille = translate.objectToBraille(abcTextSample)
+        GEX = musicxml.m21ToXml.GeneralObjectExporter(abcTextSample)
+        out = GEX.parse()  # out is bytes
+        outStr = out.decode('utf-8')  # now is string
+        global txt
+        txt = outStr.strip()
+    except:
+        error = 'Converter was not able to parse, you inputted: "{}"'.format(userinput)
+        print(error)
+
 
 if __name__ == '__main__':
     app.debug = True
