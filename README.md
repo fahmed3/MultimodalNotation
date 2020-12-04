@@ -1,7 +1,7 @@
 # MultimodalNotation
 <!-- ABOUT THE PROJECT -->
 ## About The Project
-Context of this, explanation, etc.
+A web based tex editor that takes in ABC Notation, a text-based music notation, into live multimodal output. A score of the piece is rendered as well as braille output.
 
 ### Built With
 * [Flask](https://flask.palletsprojects.com/en/1.1.x/)
@@ -34,11 +34,11 @@ Clone the repo and enter the cloned repo.
   ```sh
    $ python app.py
    ```
-Navigate to localhost:5000, where you should see the editor up and running. Here is a sample ABC Notation that you can paste into the text editor to get started, and you can also try entering other [examples](http://abcnotation.com/examples).
-
+Navigate to localhost:5000 to see the editor up and running. Here is a sample ABC Notation to paste into the text editor to get started:
   ```
   L:1/16
   M:3/4
   K:none
   D,4 D,E,F,^G, z4 | E12 |]
   ```
+[View other examples of ABC Notation](http://abcnotation.com/examples).
