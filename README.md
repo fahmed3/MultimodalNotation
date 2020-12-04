@@ -6,6 +6,7 @@ A web based tex editor that takes in ABC Notation, a text-based music notation, 
 ### Built With
 * [Flask](https://flask.palletsprojects.com/en/1.1.x/)
 * [Music21](http://web.mit.edu/music21/)
+* [OpenSheetMusicDisplay](https://opensheetmusicdisplay.org/)
 
 <!-- GETTING STARTED -->
 ## Getting Started
