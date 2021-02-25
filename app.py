@@ -14,9 +14,9 @@ mxml = ""
 braille = ""
 
 
-@app.route('/')
-def index():
-    return render_template('index.html', braille=braille)
+# @app.route('/')
+# def index():
+#     return render_template('index.html', braille=braille)
 
 
 # data will be used to store user input and
@@ -52,7 +52,7 @@ def convert_to_music_xml(userinput):
         out = GEX.parse()  # out is bytes
         outStr = out.decode('utf-8')  # now is string
         mxml = outStr.strip()
-
+        
     # Error Handling
     # Index Error - receives empty string
     # converter.ConverterException - not abcNotation
