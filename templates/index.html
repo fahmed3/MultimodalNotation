@@ -1,13 +1,16 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Document</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='index.css') }}">
-</head>
-<body>
-    <h1> Web page </h1>
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='index.css') }}"
+    />
+  </head>
+  <body>
+    <h1>Web page</h1>
     <!--         
         music21 
         text editor
@@ -16,36 +19,38 @@
 
     {{ error }}
     <div class="home">
-
-
-        <form id="formid" >
-            <textarea id="textinput" >
+      <form id="formid">
+        <textarea id="textinput">
 L:1/16
 M:3/4
 K:none
 D,4 D,E,F,^G, z4 | E12 |]                
-            </textarea>
-            <button type="submit">Render</button>
-        </form>
+            </textarea
+        >
+        <button type="submit">Render</button>
+      </form>
 
-        <div class="braille"> 
-            <h3> Braille Output </h3>
-            <div id="brailleSection"></div>
-        </div>
+      <div class="braille">
+        <h3>Braille Output</h3>
+        <div id="brailleSection"></div>
+      </div>
     </div>
 
     <div class="controls">
-        <button id="btn-play">Play</button>
-        <button id="btn-pause">Pause</button>
-        <button id="btn-stop">Stop</button>
+      <button id="btn-play">Play</button>
+      <button id="btn-pause">Pause</button>
+      <button id="btn-stop">Stop</button>
     </div>
 
-    <div id="osmdContainer"/>
+    <div id="osmdContainer" />
 
     <script src="//cdnjs.cloudflare.com/ajax/libs/mousetrap/1.4.6/mousetrap.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/mousetrap/1.4.6/mousetrap-global-bind.min.js"></script>
     <script src="https://unpkg.com/opensheetmusicdisplay@0.8.3/build/opensheetmusicdisplay.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/osmd-audio-player/umd/OsmdAudioPlayer.min.js"></script>
-    <script src="{{ url_for('static', filename='index.js') }}" type="text/javascript"></script>
-</body>
+    <script
+      src="{{ url_for('static', filename='index.js') }}"
+      type="text/javascript"
+    ></script>
+  </body>
 </html>
