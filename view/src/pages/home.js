@@ -7,11 +7,16 @@ import AppBar from "@material-ui/core/AppBar";
 import Toolbar from "@material-ui/core/Toolbar";
 import ReplayIcon from "@material-ui/icons/Replay";
 import withStyles from "@material-ui/core/styles/withStyles";
-import { OpenSheetMusicDisplay } from "opensheetmusicdisplay";
+import { OpenSheetMusicDisplay, Voice } from "opensheetmusicdisplay";
 import AudioPlayer from "osmd-audio-player";
 import PlayArrowIcon from "@material-ui/icons/PlayArrow";
 import PauseIcon from "@material-ui/icons/Pause";
 import StopIcon from "@material-ui/icons/Stop";
+import InputLabel from "@material-ui/core/InputLabel";
+import MenuItem from "@material-ui/core/MenuItem";
+import FormHelperText from "@material-ui/core/FormHelperText";
+import FormControl from "@material-ui/core/FormControl";
+import Select from "@material-ui/core/Select";
 // import { PlaybackEvent } from "../../dist/PlaybackEngine";
 
 // import TextareaAutosize from "@material-ui/core/TextareaAutosize";
@@ -36,6 +41,12 @@ const styles = (theme) => ({
     padding: theme.spacing(2),
     // position: "absolute",
   },
+  formControl: {
+    margin: theme.spacing(1),
+    top: -16,
+    minWidth: 120,
+  },
+  selectInstrument: {},
 });
 
 class home extends Component {
@@ -48,12 +59,21 @@ class home extends Component {
       braille: null,
       musicxml: undefined,
       playActive: true,
+      instruments: [],
+      instrumentId: 0,
     };
     this.osmdContainer = React.createRef();
   }
 
   handleSubmit = (event) => {
-    console.log(event.target[0].value + "hello");
+    this.setState({ instruments: this.audioPlayer.availableInstruments });
+
+    if (this.state.musicxml) {
+      this.setState({
+        playActive: true,
+      });
+      this.audioPlayer.stop();
+    }
     if (event.target[0].value) {
       let data = { userdata: event.target[0].value };
       fetch("/data", {
@@ -77,7 +97,6 @@ class home extends Component {
 
             let osmd = this.osmd;
             let audioPlayer = this.audioPlayer;
-            console.log(osmd);
             osmd
               .load(this.state.musicxml)
               .then(function () {
@@ -92,8 +111,8 @@ class home extends Component {
           })
           .catch((e) => console.log(e));
       });
+      event.preventDefault();
     }
-    event.preventDefault();
   };
 
   handlePlay = () => {
@@ -111,6 +130,14 @@ class home extends Component {
     this.audioPlayer.stop();
   };
 
+  handleInstrumentChange = (event) => {
+    this.setState({ instrumentId: event.target.value });
+    this.audioPlayer.setInstrument(
+      this.audioPlayer.scoreInstruments[0].Voices[0],
+      event.target.value
+    );
+  };
+
   componentDidMount = () => {
     this.osmd = new OpenSheetMusicDisplay(this.osmdContainer.current);
     this.audioPlayer = new AudioPlayer();
@@ -118,6 +145,15 @@ class home extends Component {
       backend: "svg",
       drawingParameters: "compacttight", // don't display title, composer etc., smaller margins
     });
+  };
+
+  componentWillUpdate = () => {
+    if (this.state.musicxml) {
+      this.audioPlayer.setInstrument(
+        this.audioPlayer.scoreInstruments[0].Voices[0],
+        this.state.instrumentId
+      );
+    }
   };
 
   render() {
@@ -141,7 +177,7 @@ class home extends Component {
             alignItems="flex-start"
           >
             <Grid item xs={12} sm={6}>
-              <form onSubmit={this.handleSubmit.bind("this")}>
+              <form onSubmit={this.handleSubmit.bind(this)}>
                 <InputABC />
               </form>
             </Grid>
@@ -168,7 +204,12 @@ M:4/4
 K:Bbmaj 
 Q:1/4=128
 g,g,f,f,C z1/2,F1/2,b,c',B z1/2,B z1/2,f,F z1/2,F z1/2,E,g2,g2,e,e,g,b,G z1/2,G z1/2,g,e',d',e',.D' g,g,f,f,C z1/2,F1/2,b,c',B z1/2,B z1/2,f,F z1/2,F z1/2,E,g2,g2,e,e,g,b,G z1/2,G z1/2,g,e',d',e',D' |]*/}
-          <div className="controls">
+          <div
+            className="controls"
+            style={
+              this.state.musicxml ? { display: "block" } : { display: "none" }
+            }
+          >
             <Grid container>
               <Grid item>
                 <Button
@@ -210,13 +251,26 @@ g,g,f,f,C z1/2,F1/2,b,c',B z1/2,B z1/2,f,F z1/2,F z1/2,E,g2,g2,e,e,g,b,G z1/2,G 
                   <div style={{ margin: "2.5px" }}>Stop</div>
                 </Button>
               </Grid>
+              <Grid>
+                <FormControl className={classes.formControl}>
+                  <InputLabel>Instruments</InputLabel>
+                  {/* <div style={{ height: "210px" }}> */}
+                  <Select
+                    className={classes.selectInstrument}
+                    onChange={this.handleInstrumentChange.bind(this)}
+                  >
+                    {this.state.instruments.map((instrument) => (
+                      <MenuItem value={instrument.midiId}>
+                        {instrument.name}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+              </Grid>
             </Grid>
           </div>
           <br />
-          <div
-            ref={this.osmdContainer}
-            // id="osmdContainer"
-          />
+          <div ref={this.osmdContainer} />
         </div>
       </div>
     );
