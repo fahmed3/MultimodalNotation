@@ -1,5 +1,6 @@
 let form = document.getElementById("formid");
 let braille_sect = document.getElementById("brailleSection");
+let error_sect = document.getElementById("errorSection");
 let musicxml = "";
 let textinput = document.getElementById("textinput");
 let btn = document.getElementsByTagName("button")[0];
@@ -48,20 +49,23 @@ form.addEventListener("submit", (event) => {
         .then(function (response) {
           musicxml = response["user_input"];
           braille = response["braille"];
-          openSheetMusicDisplay
-            .load(musicxml)
-            .then(function () {
-              openSheetMusicDisplay.render();
-            })
-            .then(function () {
-              registerButtonEvents(audioPlayer);
-              audioPlayer.loadScore(openSheetMusicDisplay);
-              audioPlayer.on("iteration", (notes) => {
-                console.log(notes);
+          errors = response["errors"];
+          if (musicxml.length > 0) {
+            openSheetMusicDisplay
+              .load(musicxml)
+              .then(function () {
+                openSheetMusicDisplay.render();
+              })
+              .then(function () {
+                registerButtonEvents(audioPlayer);
+                audioPlayer.loadScore(openSheetMusicDisplay);
+                audioPlayer.on("iteration", (notes) => {
+                  console.log(notes);
+                });
               });
-            });
-
+          }
           braille_sect.innerHTML = braille;
+          error_sect.innerHTML = errors;
         })
         .catch((e) => console.log(e));
     });
