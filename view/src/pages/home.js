@@ -26,6 +26,9 @@ import InputABC from "../components/input";
 import Tutorial from "../components/tutorial";
 
 import { makeStyles, ThemeProvider } from "@material-ui/core/styles";
+import { Link } from "react-router-dom";
+import './home.css'
+
 
 const Transition = React.forwardRef(function Transition(props, ref) {
   return <Slide direction="up" ref={ref} {...props} />;
@@ -187,12 +190,8 @@ class home extends Component {
               Welcome To MultiModal Notation!
             </Typography>
             <div style={{ position: "absolute", right: "2%" }}>
-              <Button
-                onClick={this.handleTutorialChange.bind(this)}
-                variant="outlined"
-                color="inherit"
-              >
-                Tutorial
+              <Button variant="outlined" className="tutorial-button" color="inherit">
+                <Link to="/tutorial" className="nav-link">Tutorial</Link>
               </Button>
             </div>
           </Toolbar>
