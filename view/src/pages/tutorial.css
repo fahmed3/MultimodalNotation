@@ -1,0 +1,15 @@
+.nav-link {
+  text-decoration: none;
+  color: #f0f8ff;
+}
+
+.nav-link:hover {
+  color: #ebebeb;
+}
+
+p,
+h2,
+h3,
+h4 {
+  font-family: Verdana, Tahoma, sans-serif;
+}

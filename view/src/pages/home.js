@@ -24,6 +24,9 @@ import Select from "@material-ui/core/Select";
 import InputABC from "../components/input";
 
 import { makeStyles, ThemeProvider } from "@material-ui/core/styles";
+import { Link } from "react-router-dom";
+import './home.css'
+
 
 const styles = (theme) => ({
   backgroundColor: theme.palette.background.paper,
@@ -47,6 +50,7 @@ const styles = (theme) => ({
     minWidth: 120,
   },
   selectInstrument: {},
+
 });
 
 class home extends Component {
@@ -156,6 +160,8 @@ class home extends Component {
     }
   };
 
+
+
   render() {
     const { classes } = this.props;
     return (
@@ -165,6 +171,11 @@ class home extends Component {
             <Typography component="h1" variant="h5">
               Welcome To MultiModal Notation!
             </Typography>
+            <div style={{ position: "absolute", right: "2%" }}>
+              <Button variant="outlined" className="tutorial-button" color="inherit">
+                <Link to="/tutorial" className="nav-link">Tutorial</Link>
+              </Button>
+            </div>
           </Toolbar>
         </AppBar>
         <div className={classes.root}>
