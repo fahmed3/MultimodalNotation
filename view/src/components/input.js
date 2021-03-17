@@ -27,6 +27,7 @@ class inputabc extends Component {
           rows={10}
           rowsMax={25}
           fullWidth
+          // onKeyPress={this.handleKeyPress}
           defaultValue="L:1/8 
           M:4/4 
           K:Bbmaj 

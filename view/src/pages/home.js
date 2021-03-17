@@ -22,7 +22,7 @@ import { Dialog } from "@material-ui/core";
 import IconButton from "@material-ui/core/IconButton";
 import CloseIcon from "@material-ui/icons/Close";
 
-import InputABC from "../components/input";
+// import InputABC from "../components/input";
 import Tutorial from "../components/tutorial";
 
 import { makeStyles, ThemeProvider } from "@material-ui/core/styles";
@@ -154,6 +154,13 @@ class home extends Component {
     this.setState({ showTutorial: !this.state.showTutorial });
   };
 
+  handleKeyPress = (event) => {
+    if (event.keyCode === "Enter") {
+      console.log("hello");
+      this.btn.click();
+    }
+  };
+
   componentDidMount = () => {
     this.osmd = new OpenSheetMusicDisplay(this.osmdContainer.current);
     this.audioPlayer = new AudioPlayer();
@@ -176,6 +183,11 @@ class home extends Component {
   // Volume setting
   // Make a button to make expand the font size for the text editor
   // Try to make a TextField onChange so that when the space bar is hit that it will play the inputted note
+  // Switch to make Midi editor like FL piano roll and export midi to musicXML
+  // https://github.com/paulrosen/abcjs
+  // https://www.npmjs.com/package/react-abcjs
+  // ctrl+enter = render
+  // https://cdn.rawgit.com/paulrosen/abcjs/main/examples/editor.html
 
   render() {
     const { classes } = this.props;
@@ -229,7 +241,38 @@ class home extends Component {
           >
             <Grid item xs={12} sm={6}>
               <form onSubmit={this.handleSubmit.bind(this)}>
-                <InputABC />
+                <div>
+                  <TextField
+                    id="textinput"
+                    variant="outlined"
+                    label="ABCNotation"
+                    name="abcnotation"
+                    margin="normal"
+                    multiline
+                    rows={10}
+                    rowsMax={25}
+                    fullWidth
+                    onKeyPress={this.handleKeyPress.bind(this)}
+                    defaultValue="L:1/8 
+          M:4/4 
+          K:Bbmaj 
+          Q:1/4=128
+          g,g,f,f,C z1/2,F1/2,b,c',B z1/2,B z1/2,f,F z1/2,F z1/2,E,g2,g2,e,e,g,b,G z1/2,G z1/2,g,e',d',e',.D' g,g,f,f,C z1/2,F1/2,b,c',B z1/2,B z1/2,f,F z1/2,F z1/2,E,g2,g2,e,e,g,b,G z1/2,G z1/2,g,e',d',e',D' |]"
+                  />
+                  <br />
+                  <Button
+                    type="submit"
+                    // onClick={this.handleSubmit.bind(this)}
+                    variant="contained"
+                    startIcon={<ReplayIcon />}
+                    color="primary"
+                    ref={(node) => (this.btn = node)}
+                  >
+                    <div style={{ margin: "2.5px" }}>Render</div>
+                  </Button>
+
+                  {/* <button type="submit">Render</button> */}
+                </div>
               </form>
             </Grid>
             <Grid item xs={12} sm={6}>
