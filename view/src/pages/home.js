@@ -2,7 +2,7 @@ import React, { Component } from "react";
 import TextField from "@material-ui/core/TextField";
 import CardContent from "@material-ui/core/CardContent";
 import Card from "@material-ui/core/Card";
-import { Typography, Grid, Button } from "@material-ui/core";
+import { Typography, Grid, Button, Box } from "@material-ui/core";
 import AppBar from "@material-ui/core/AppBar";
 import Toolbar from "@material-ui/core/Toolbar";
 import ReplayIcon from "@material-ui/icons/Replay";
@@ -21,14 +21,16 @@ import Slide from "@material-ui/core/Slide";
 import { Dialog } from "@material-ui/core";
 import IconButton from "@material-ui/core/IconButton";
 import CloseIcon from "@material-ui/icons/Close";
+import Switch from "@material-ui/core/Switch";
+
+import * as Tone from "tone";
 
 // import InputABC from "../components/input";
 import Tutorial from "../components/tutorial";
 
 import { makeStyles, ThemeProvider } from "@material-ui/core/styles";
 import { Link } from "react-router-dom";
-import './home.css'
-
+import "./home.css";
 
 const Transition = React.forwardRef(function Transition(props, ref) {
   return <Slide direction="up" ref={ref} {...props} />;
@@ -79,18 +81,25 @@ class home extends Component {
       instruments: [],
       instrumentId: 0,
       showTutorial: false,
+      responsiveEditing: true,
     };
     this.osmdContainer = React.createRef();
   }
 
   handleSubmit = (event) => {
     this.setState({ instruments: this.audioPlayer.availableInstruments });
+    console.log(typeof event);
     if (this.state.musicxml) {
       this.setState({ playActive: true });
       this.audioPlayer.stop();
     }
-    if (event.target[0].value) {
-      let data = { userdata: event.target[0].value };
+    if (typeof event == "string" || event.target[0].value) {
+      let data;
+      if (typeof event == "string") {
+        data = { userdata: event };
+      } else {
+        data = { userdata: event.target[0].value };
+      }
       fetch("/data", {
         method: "POST",
         body: JSON.stringify(data),
@@ -126,7 +135,9 @@ class home extends Component {
           })
           .catch((e) => console.log(e));
       });
-      event.preventDefault();
+      if (!(typeof event == "string")) {
+        event.preventDefault();
+      }
     }
   };
 
@@ -157,10 +168,67 @@ class home extends Component {
     this.setState({ showTutorial: !this.state.showTutorial });
   };
 
-  handleKeyPress = (event) => {
-    if (event.keyCode === "Enter") {
-      console.log("hello");
-      this.btn.click();
+  switchHandler = () => {
+    this.setState({ responsiveEditing: !this.state.responsiveEditing });
+  };
+
+  keydownHandler = (event) => {
+    if (event.keyCode === 13 && event.ctrlKey) {
+      this.handleSubmit(event.target.value);
+    }
+    if (event.keyCode === 32 && this.state.responsiveEditing) {
+      const synth = new Tone.Synth().toDestination();
+      let note = "";
+      let lastSpace = 0;
+      for (
+        lastSpace = event.target.selectionStart - 1;
+        event.target.value.charAt(lastSpace) !== " ";
+        lastSpace--
+      ) {}
+      note = event.target.value.substring(
+        lastSpace + 1,
+        event.target.selectionStart
+      );
+      let octave = 4;
+      if (note.charAt(0) === note.charAt(0).toLowerCase()) {
+        octave = 5;
+      }
+      for (let i = 0; i < note.length; i++) {
+        if (note.charAt(i) == "'") {
+          octave++;
+        }
+        if (note.charAt(i) == ",") {
+          octave--;
+        }
+      }
+      let noteLength = "1/8";
+      if (event.target.value.includes("L:")) {
+        noteLength = event.target.value.substring(
+          event.target.value.indexOf("L:") + 2,
+          event.target.value
+            .substring(event.target.value.indexOf("L:"))
+            .indexOf("\n")
+        );
+      }
+      for (let i = 0; i < note.length; i++) {
+        if (note.charAt(i) <= 9) {
+          if (noteLength.includes("/")) {
+            noteLength = eval(noteLength);
+          }
+          noteLength = noteLength * eval(note.charAt(i));
+        }
+      }
+      noteLength = eval(noteLength) ** -1;
+
+      // console.log(note);
+      // console.log(lastSpace);
+      // console.log(event.target.selectionStart);
+      // console.log(octave);
+      // console.log(noteLength);
+      synth.triggerAttackRelease(
+        note.charAt(0) + "" + octave,
+        noteLength + "n"
+      );
     }
   };
 
@@ -189,7 +257,6 @@ class home extends Component {
   // Switch to make Midi editor like FL piano roll and export midi to musicXML
   // https://github.com/paulrosen/abcjs
   // https://www.npmjs.com/package/react-abcjs
-  // ctrl+enter = render
   // https://cdn.rawgit.com/paulrosen/abcjs/main/examples/editor.html
 
   render() {
@@ -202,8 +269,16 @@ class home extends Component {
               Welcome To MultiModal Notation!
             </Typography>
             <div style={{ position: "absolute", right: "2%" }}>
-              <Button variant="outlined" className="tutorial-button" color="inherit">
-                <Link to="/tutorial" className="nav-link">Tutorial</Link>
+              <Button
+                variant="outlined"
+                className="tutorial-button"
+                color="inherit"
+                // onClick={this.handleTutorialChange.bind(this)}
+              >
+                {/* Tutorial */}
+                <Link to="/tutorial" className="nav-link">
+                  Tutorial
+                </Link>
               </Button>
             </div>
           </Toolbar>
@@ -251,25 +326,48 @@ class home extends Component {
                     rows={10}
                     rowsMax={25}
                     fullWidth
-                    onKeyPress={this.handleKeyPress.bind(this)}
+                    onKeyDown={this.keydownHandler.bind(this)}
+                    // onKeyPress={this.handleKeyPress.bind(this)}
                     defaultValue="L:1/8 
-          M:4/4 
-          K:Bbmaj 
-          Q:1/4=128
-          g,g,f,f,C z1/2,F1/2,b,c',B z1/2,B z1/2,f,F z1/2,F z1/2,E,g2,g2,e,e,g,b,G z1/2,G z1/2,g,e',d',e',.D' g,g,f,f,C z1/2,F1/2,b,c',B z1/2,B z1/2,f,F z1/2,F z1/2,E,g2,g2,e,e,g,b,G z1/2,G z1/2,g,e',d',e',D' |]"
+                    M:4/4 
+                    K:Bbmaj 
+                    Q:1/4=128
+                    G G F F C z1/2 F1/2, B c | B z1/2 B z1/2 F F z1/2 F z1/2 E, | G2 G2 E E G B | G z1/2 G z1/2 G e d e .d |]"
                   />
                   <br />
-                  <Button
-                    type="submit"
-                    // onClick={this.handleSubmit.bind(this)}
-                    variant="contained"
-                    startIcon={<ReplayIcon />}
-                    color="primary"
-                    ref={(node) => (this.btn = node)}
-                  >
-                    <div style={{ margin: "2.5px" }}>Render</div>
-                  </Button>
-
+                  <Grid container direction="row">
+                    <Grid item>
+                      <Button
+                        type="submit"
+                        // onClick={this.handleSubmit.bind(this)}
+                        variant="contained"
+                        startIcon={<ReplayIcon />}
+                        color="primary"
+                        ref={(node) => (this.btn = node)}
+                      >
+                        <div style={{ margin: "2.5px" }}>Render</div>
+                      </Button>
+                    </Grid>
+                    <Grid
+                      item
+                      style={{
+                        marginTop: "7px",
+                        marginLeft: "20px",
+                      }}
+                    >
+                      <Typography style={{ fontSize: "18.5px" }}>
+                        Responsive Editing
+                      </Typography>
+                    </Grid>
+                    <Grid item>
+                      <Switch
+                        checked={this.state.responsiveEditing}
+                        onChange={this.switchHandler.bind(this)}
+                        color="primary"
+                        inputProps={{ "aria-label": "primary checkbox" }}
+                      />
+                    </Grid>
+                  </Grid>
                   {/* <button type="submit">Render</button> */}
                 </div>
               </form>

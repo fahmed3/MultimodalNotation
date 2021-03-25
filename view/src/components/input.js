@@ -32,7 +32,7 @@ class inputabc extends Component {
           M:4/4 
           K:Bbmaj 
           Q:1/4=128
-          g,g,f,f,C z1/2,F1/2,b,c',B z1/2,B z1/2,f,F z1/2,F z1/2,E,g2,g2,e,e,g,b,G z1/2,G z1/2,g,e',d',e',.D' g,g,f,f,C z1/2,F1/2,b,c',B z1/2,B z1/2,f,F z1/2,F z1/2,E,g2,g2,e,e,g,b,G z1/2,G z1/2,g,e',d',e',D' |]"
+          g,g,f,f,C z1/2,F1/2,b,c',B z1/2,B z1/2,f,F z1/2,F z1/2,E,g2,g2,e,e,g,b,G z1/2,G z1/2,g,e',d',e',.D' g,g,f,f,C z1/2,F1/2,b,c',B z1/2,B z1/2,f,F z1/2,F z1/2,E,g2,g2,e,e,g,b,G z1/2,G z1/2,g,e',d',e', D' |]"
         />
         <br />
         <Button
@@ -43,8 +43,6 @@ class inputabc extends Component {
         >
           <div style={{ margin: "2.5px" }}>Render</div>
         </Button>
-
-        {/* <button type="submit">Render</button> */}
       </div>
     );
   }
