@@ -34,42 +34,41 @@ window.onload = function () {
     },
     abcjsParams: {
       add_classes: true,
-      //   clickListener: clickListener,
+      clickListener: clickListener,
     },
     selectionChangeCallback: selectionChangeCallback,
   });
 };
 
-var lastNote = [];
+function clickListener(
+  abcElem,
+  tuneNumber,
+  classes,
+  analysis,
+  drag,
+  mouseEvent
+) {
+  var lastClicked = abcElem.midiPitches;
+  if (!lastClicked) return;
+
+  ABCJS.synth
+    .playEvent(
+      lastClicked,
+      abcElem.midiGraceNotePitches,
+      abcjsEditor.millisecondsPerMeasure()
+    )
+    .then(function (response) {
+      console.log("note played");
+    })
+    .catch(function (error) {
+      console.log("error playing note", error);
+    });
+}
 
 function selectionChangeCallback(start, end) {
   if (abcjsEditor) {
     var el = abcjsEditor.tunes[0].getElementFromChar(start);
-
     if (!el) return;
-
-    //abcjs source code
-    var lastClicked = el.midiPitches;
-    if (!lastClicked) return; // returns when play button hasnt been pressed yet
-    // synth not initialized yet?
-
-    // if (lastClicked != lastNote) {
-    //only plays if cursor moves to new note
-
-    console.log(lastClicked);
-    ABCJS.synth
-      .playEvent(
-        lastClicked,
-        el.midiGraceNotePitches,
-        abcjsEditor.millisecondsPerMeasure()
-      )
-      .then(function (response) {
-        console.log("note played");
-        lastNote = lastClicked;
-      })
-      .catch(function (error) {
-        console.log("error playing note", error);
-      });
-    // }
+    console.log(el);
   }
 }
