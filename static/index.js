@@ -35,8 +35,10 @@ window.onload = function () {
     abcjsParams: {
       add_classes: true,
       clickListener: clickListener,
+
     },
     selectionChangeCallback: selectionChangeCallback,
+    onchange: onchangeCallback,
   });
 };
 
@@ -69,6 +71,38 @@ function selectionChangeCallback(start, end) {
   if (abcjsEditor) {
     var el = abcjsEditor.tunes[0].getElementFromChar(start);
     if (!el) return;
-    console.log(el);
   }
+}
+
+function onchangeCallback(editor) {
+  // console.log("onchange: ", editor);
+  var start = editor.editarea.getSelection().start - 1;
+  console.log("start", start);
+  setTimeout(() => {
+    if (abcjsEditor) {
+      // console.log("editor", abcjsEditor);
+      console.log("tunes", abcjsEditor.tunes[0]);
+      var el = abcjsEditor.tunes[0].getElementFromChar(start);
+      // console.log("el:", el);
+      if (!el) return;
+      console.log("on change el: ", el);
+
+      var lastClicked = el.midiPitches;
+      if (!lastClicked) return;
+    
+      ABCJS.synth
+        .playEvent(
+          lastClicked,
+          el.midiGraceNotePitches,
+          abcjsEditor.millisecondsPerMeasure()
+        )
+        .then(function (response) {
+          console.log("note played");
+        })
+        .catch(function (error) {
+          console.log("error playing note", error);
+        });
+
+    }
+  }, 300);
 }
