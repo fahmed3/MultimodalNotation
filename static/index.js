@@ -1,6 +1,8 @@
 let form = document.getElementById("formID");
 // let braille_sect = document.getElementById("brailleSection");
 let textinput = document.getElementById("abc");
+// textinput.addEventListener("keydown", keydownCallback);
+
 
 form.addEventListener("submit", (event) => {
   event.preventDefault();
@@ -13,7 +15,12 @@ form.addEventListener("submit", (event) => {
       Accept: "application/json",
       "Content-Type": "application/json",
     },
-  }).catch((e) => console.log(e));
+  })
+  .then(() => {
+    //click play button to start audio playback, same button to pause
+    document.getElementsByClassName('abcjs-midi-start abcjs-btn')[0].click();
+  })
+  .catch((e) => console.log(e));
 });
 
 var abcjsEditor;
@@ -35,12 +42,13 @@ window.onload = function () {
     abcjsParams: {
       add_classes: true,
       clickListener: clickListener,
-
+      afterParsing: afterParsingCallback,
     },
     selectionChangeCallback: selectionChangeCallback,
-    onchange: onchangeCallback,
+    // onchange: onchangeCallback,
   });
 };
+
 
 function clickListener(
   abcElem,
@@ -74,35 +82,49 @@ function selectionChangeCallback(start, end) {
   }
 }
 
-function onchangeCallback(editor) {
-  // console.log("onchange: ", editor);
-  var start = editor.editarea.getSelection().start - 1;
-  console.log("start", start);
-  setTimeout(() => {
-    if (abcjsEditor) {
-      // console.log("editor", abcjsEditor);
-      console.log("tunes", abcjsEditor.tunes[0]);
-      var el = abcjsEditor.tunes[0].getElementFromChar(start);
-      // console.log("el:", el);
-      if (!el) return;
-      console.log("on change el: ", el);
 
-      var lastClicked = el.midiPitches;
-      if (!lastClicked) return;
-    
-      ABCJS.synth
-        .playEvent(
-          lastClicked,
-          el.midiGraceNotePitches,
-          abcjsEditor.millisecondsPerMeasure()
-        )
-        .then(function (response) {
-          console.log("note played");
-        })
-        .catch(function (error) {
-          console.log("error playing note", error);
-        });
+var initabc = textinput.value.split(" ").join("");
 
+function afterParsingCallback(tune, tuneNumber, abcString){
+  // console.log("tune", tune);
+  if(abcjsEditor){
+
+    // console.log("abcjseditor ", abcjsEditor);
+    var start = abcjsEditor.editarea.getSelection().start - 1;
+
+    var el = tune.getElementFromChar(start);
+
+    var currabc = abcjsEditor.currentAbc.split(" ").join("");
+
+    console.log("current abc: ", currabc);
+    console.log("initial abc: ", initabc);
+
+    if(initabc.length >= currabc.length || !el){ // if deleting and adding at same time (replaces highlighted text w/ new letter), ignores adding - fix later
+      initabc = currabc;
+      return;
     }
-  }, 300);
+    initabc = currabc;
+
+    setTimeout(() => {
+    var lastClicked = el.midiPitches;
+    // console.log("last", Object.keys(el));
+    if (!lastClicked) return;
+    // console.log("hello");
+
+    ABCJS.synth
+      .playEvent(
+        lastClicked,
+        el.midiGraceNotePitches,
+        abcjsEditor.millisecondsPerMeasure()
+      )
+      .then(function (response) {
+        console.log("note played");
+      })
+      .catch(function (error) {
+        console.log("error playing note", error);
+      });
+    }, 300);    
+    initabc = currabc;
+  }
+  
 }

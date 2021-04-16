@@ -2781,7 +2781,6 @@
 
           Editor.prototype.isDirty = function () {
             if (this.indicate_changed === undefined) {
-              console.log("dirty function");
               return false;
             }
             return this.editarea.initialText !== this.editarea.getString();
@@ -15354,6 +15353,10 @@
                       break;
                   }
                 }
+
+                console.log("after other for loop", element.midiPitches);
+                // if (params.afterMidiParsing)
+                //   params.afterMidiParsing(element);
 
                 if (currentTrack[0].instrument === undefined)
                   currentTrack[0].instrument = instrument ? instrument : 0;
