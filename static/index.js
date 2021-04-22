@@ -96,8 +96,8 @@ function afterParsingCallback(tune, tuneNumber, abcString){
 
     var currabc = abcjsEditor.currentAbc.split(" ").join("");
 
-    console.log("current abc: ", currabc);
-    console.log("initial abc: ", initabc);
+    // console.log("current abc: ", currabc);
+    // console.log("initial abc: ", initabc);
 
     if(initabc.length >= currabc.length || !el){ // if deleting and adding at same time (replaces highlighted text w/ new letter), ignores adding - fix later
       initabc = currabc;

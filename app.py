@@ -14,7 +14,7 @@ D,4 D,E,F,^G, z4 | E12 |]
 
 @app.route('/')
 def index():
-    return render_template('editor-synth.html')
+    return render_template('editor-synth.html', braille=braille)
 
 @app.route("/data", methods=['GET', 'POST'])
 def getuserinput():
@@ -22,7 +22,7 @@ def getuserinput():
         return "get request"
     if request.method == 'POST':
         data = request.get_json()['userdata']  # change to less vague name
-        print("received data: ", data)
+        # print("received data: ", data)
         # Convert user input to the output
         convert_to_music_xml(data)
         return 'Success', 200
