@@ -1,8 +1,14 @@
-import React, { Component } from "react";
+import React, { useEffect, useState } from "react";
 import TextField from "@material-ui/core/TextField";
 import CardContent from "@material-ui/core/CardContent";
 import Card from "@material-ui/core/Card";
-import { Typography, Grid, Button, Box } from "@material-ui/core";
+import {
+  Typography,
+  Grid,
+  Button,
+  Box,
+  TextareaAutosize,
+} from "@material-ui/core";
 import AppBar from "@material-ui/core/AppBar";
 import Toolbar from "@material-ui/core/Toolbar";
 import ReplayIcon from "@material-ui/icons/Replay";
@@ -31,6 +37,8 @@ import { useTheme } from "@material-ui/core/styles";
 import ChevronLeftIcon from "@material-ui/icons/ChevronLeft";
 import ChevronRightIcon from "@material-ui/icons/ChevronRight";
 import Divider from "@material-ui/core/Divider";
+import Alert from "@material-ui/lab/Alert";
+import AlertTitle from "@material-ui/lab/AlertTitle";
 
 import * as Tone from "tone";
 
@@ -45,121 +53,43 @@ import Tutorial from "../components/tutorial";
 import { makeStyles, ThemeProvider } from "@material-ui/core/styles";
 import { Link } from "react-router-dom";
 import "./home.css";
-import quickStartText from "../components/quickStart";
+import QuickStart from "../components/quickStart";
+
+import styles from "./homeStyles";
 
 const Transition = React.forwardRef(function Transition(props, ref) {
   return <Slide direction="up" ref={ref} {...props} />;
 });
 
-const drawerWidth = 240;
+const Home = (props) => {
+  const { classes } = props;
+  const [errors, setErrors] = useState([]);
+  const [abcjsEditor, setAbcjsEditor] = useState(null);
+  const [showCards, setShowCards] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [braille, setBraille] = useState(null);
+  const [musicxml, setMusicxml] = useState(undefined);
+  const [playActive, setPlayActive] = useState(true);
+  const [instruments, setInstruments] = useState([]);
+  const [instrumentId, setInstrumentId] = useState(0);
+  const [showTutorial, setShowTutorial] = useState(false);
+  const [responsiveEditing, setResponsiveEditing] = useState(true);
+  const [drawerOpen, setDrawerOpen] = useState(false);
 
-const styles = (theme) => ({
-  appBar: {
-    transition: theme.transitions.create(["margin", "width"], {
-      easing: theme.transitions.easing.sharp,
-      duration: theme.transitions.duration.leavingScreen,
-    }),
-  },
-  appBarShift: {
-    width: `calc(100% - ${drawerWidth}px)`,
-    marginLeft: drawerWidth,
-    transition: theme.transitions.create(["margin", "width"], {
-      easing: theme.transitions.easing.easeOut,
-      duration: theme.transitions.duration.enteringScreen,
-    }),
-  },
-  menuButton: {
-    marginRight: theme.spacing(2),
-  },
-  hide: {
-    display: "none",
-  },
-  drawer: {
-    width: drawerWidth,
-    flexShrink: 0,
-  },
-  drawerPaper: {
-    width: drawerWidth,
-  },
-  drawerHeader: {
-    display: "flex",
-    alignItems: "center",
-    padding: theme.spacing(0, 1),
-    // necessary for content to be below app bar
-    ...theme.mixins.toolbar,
-    justifyContent: "flex-end",
-  },
-  content: {
-    flexGrow: 1,
-    padding: theme.spacing(3),
-    transition: theme.transitions.create("margin", {
-      easing: theme.transitions.easing.sharp,
-      duration: theme.transitions.duration.leavingScreen,
-    }),
-    // marginLeft: -drawerWidth,
-  },
-  contentShift: {
-    transition: theme.transitions.create("margin", {
-      easing: theme.transitions.easing.easeOut,
-      duration: theme.transitions.duration.enteringScreen,
-    }),
-    marginLeft: 0,
-  },
-  backgroundColor: theme.palette.background.paper,
-  root: {
-    backgroundColor: theme.palette.background.default,
-    padding: theme.spacing(4),
-    borderRadius: "8px",
-    marginTop: "2.6%",
-    display: "flex",
-  },
-  drawer: {
-    width: 240,
-    flexShrink: 0,
-  },
-  form: {
-    margin: "70px",
-  },
-  grid: {
-    // maxWidth: "33.33%",
-    marginLeft: theme.spacing(0.25),
-    padding: theme.spacing(2),
-    // position: "absolute",
-  },
-  formControl: {
-    margin: theme.spacing(1),
-    top: -16,
-    minWidth: 120,
-  },
-  selectInstrument: {},
-  closeButton: {
-    position: "absolute",
-    right: theme.spacing(1),
-    top: theme.spacing(1),
-    color: theme.palette.grey[500],
-  },
-  braille: { marginTop: "2%" },
-});
+  const handleDrawerOpen = () => {
+    setDrawerOpen(true);
+  };
 
-class home extends Component {
-  constructor(props) {
-    super(props);
+  const handleDrawerClose = () => {
+    setDrawerOpen(false);
+  };
 
-    this.state = {
-      errors: [],
-      loading: false,
-      braille: null,
-      musicxml: undefined,
-      playActive: true,
-      instruments: [],
-      instrumentId: 0,
-      showTutorial: false,
-      responsiveEditing: true,
-      drawerOpen: false,
-    };
-    this.paper = React.createRef();
-  }
+  const handleTutorialChange = () => {
+    setDrawerOpen(!showTutorial);
+  };
 
+  // this.paper = React.createRef();
+  /*
   handleSubmit = (event) => {
     this.setState({ instruments: this.audioPlayer.availableInstruments });
     console.log(typeof event);
@@ -238,18 +168,7 @@ class home extends Component {
     );
   };
 
-  handleDrawerOpen = () => {
-    this.setState({ drawerOpen: true });
-  };
-
-  handleDrawerClose = () => {
-    this.setState({ drawerOpen: false });
-  };
-
-  handleTutorialChange = () => {
-    this.setState({ showTutorial: !this.state.showTutorial });
-  };
-
+ 
   switchHandler = () => {
     this.setState({ responsiveEditing: !this.state.responsiveEditing });
   };
@@ -349,7 +268,7 @@ class home extends Component {
         this.state.instrumentId
       );
     }
-  };
+  };*/
 
   // headers for key signature and all that stuff
   // Volume setting
@@ -360,31 +279,76 @@ class home extends Component {
   // https://www.npmjs.com/package/react-abcjs
   // https://cdn.rawgit.com/paulrosen/abcjs/main/examples/editor.html
 
-  render() {
-    const { classes } = this.props;
+  let form = document.getElementById("formID");
+  // let braille_sect = document.getElementById("brailleSection");
+  let textinput = document.getElementById("abc");
 
-    let form = document.getElementById("formID");
-    // let braille_sect = document.getElementById("brailleSection");
-    let textinput = document.getElementById("abc");
+  const handleFormSubmit = (event, isArr = true) => {
+    event.preventDefault();
+    let data;
+    if (isArr) {
+      data = { userdata: event.target[0].value };
+    } else {
+      data = { userdata: event.target.value };
+    }
 
-    const handleFormSubmit = (event) => {
-      event.preventDefault();
-      let data = { userdata: textinput.value };
-      console.log(data);
-      fetch("/data", {
-        method: "POST",
-        body: JSON.stringify(data),
-        headers: {
-          Accept: "application/json",
-          "Content-Type": "application/json",
-        },
-      }).catch((e) => console.log(e));
-    };
+    fetch("/data", {
+      method: "POST",
+      body: JSON.stringify(data),
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+      },
+    }).then((res) => {
+      console.log("Request complete! response:", res);
+      fetch("/data")
+        .then((response) => {
+          return response.json();
+        })
+        .then((response) => {
+          setBraille(response["braille"]);
+          console.log(response["braille"]);
+        })
+        .catch((e) => console.log(e));
+    });
+  };
 
-    var abcjsEditor;
+  const keydownHandler = (event) => {
+    if (event.keyCode === 13 && event.ctrlKey) {
+      console.log(event);
+      handleFormSubmit(event, false);
+    }
+  };
 
-    window.onload = function () {
-      abcjsEditor = new ABCJS.Editor("abc", {
+  const print = () => {
+    window.print();
+  };
+
+  // window.onload = function () {
+  //   abcjsEditor = new ABCJS.Editor("abc", {
+  //     canvas_id: "paper",
+  //     warnings_id: "warnings",
+  //     synth: {
+  //       el: "#audio",
+  //       options: {
+  //         displayLoop: true,
+  //         displayRestart: true,
+  //         displayPlay: true,
+  //         displayProgress: true,
+  //         displayWarp: true,
+  //       },
+  //     },
+  //     abcjsParams: {
+  //       add_classes: true,
+  //       clickListener: clickListener,
+  //     },
+  //     selectionChangeCallback: selectionChangeCallback,
+  //   });
+  // };
+
+  useEffect(() => {
+    setAbcjsEditor(
+      new ABCJS.Editor("abc", {
         canvas_id: "paper",
         warnings_id: "warnings",
         synth: {
@@ -402,156 +366,165 @@ class home extends Component {
           clickListener: clickListener,
         },
         selectionChangeCallback: selectionChangeCallback,
+      })
+    );
+  }, []);
+
+  const handleTextChange = () => {
+    console.log(errors);
+    setErrors(abcjsEditor.warnings);
+    console.log(abcjsEditor);
+  };
+
+  function clickListener(
+    abcElem,
+    tuneNumber,
+    classes,
+    analysis,
+    drag,
+    mouseEvent
+  ) {
+    var lastClicked = abcElem.midiPitches;
+    if (!lastClicked) return;
+
+    ABCJS.synth
+      .playEvent(
+        lastClicked,
+        abcElem.midiGraceNotePitches,
+        abcjsEditor.millisecondsPerMeasure()
+      )
+      .then(function (response) {
+        console.log("note played");
+      })
+      .catch(function (error) {
+        console.log("error playing note", error);
       });
-    };
+  }
 
-    function clickListener(
-      abcElem,
-      tuneNumber,
-      classes,
-      analysis,
-      drag,
-      mouseEvent
-    ) {
-      var lastClicked = abcElem.midiPitches;
-      if (!lastClicked) return;
+  // function selectionChangeCallback(start, end) {
+  //   if (abcjsEditor) {
+  //     var el = abcjsEditor.tunes[0].getElementFromChar(start);
+  //     if (!el) return;
+  //     console.log(el);
+  //   }
+  // }
 
+  var lastNote = [];
+
+  function selectionChangeCallback(start, end) {
+    if (abcjsEditor) {
+      var el = abcjsEditor.tunes[0].getElementFromChar(start);
+
+      if (!el) return;
+
+      //abcjs source code
+      var lastClicked = el.midiPitches;
+      if (!lastClicked) return; // returns when play button hasnt been pressed yet
+      // synth not initialized yet?
+
+      // if (lastClicked != lastNote) {
+      //only plays if cursor moves to new note
+
+      console.log(lastClicked);
       ABCJS.synth
         .playEvent(
           lastClicked,
-          abcElem.midiGraceNotePitches,
+          el.midiGraceNotePitches,
           abcjsEditor.millisecondsPerMeasure()
         )
         .then(function (response) {
           console.log("note played");
+          lastNote = lastClicked;
         })
         .catch(function (error) {
           console.log("error playing note", error);
         });
     }
+  }
 
-    // function selectionChangeCallback(start, end) {
-    //   if (abcjsEditor) {
-    //     var el = abcjsEditor.tunes[0].getElementFromChar(start);
-    //     if (!el) return;
-    //     console.log(el);
-    //   }
-    // }
-
-    var lastNote = [];
-
-    function selectionChangeCallback(start, end) {
-      if (abcjsEditor) {
-        var el = abcjsEditor.tunes[0].getElementFromChar(start);
-
-        if (!el) return;
-
-        //abcjs source code
-        var lastClicked = el.midiPitches;
-        if (!lastClicked) return; // returns when play button hasnt been pressed yet
-        // synth not initialized yet?
-
-        // if (lastClicked != lastNote) {
-        //only plays if cursor moves to new note
-
-        console.log(lastClicked);
-        ABCJS.synth
-          .playEvent(
-            lastClicked,
-            el.midiGraceNotePitches,
-            abcjsEditor.millisecondsPerMeasure()
-          )
-          .then(function (response) {
-            console.log("note played");
-            lastNote = lastClicked;
-          })
-          .catch(function (error) {
-            console.log("error playing note", error);
-          });
-      }
-    }
-
-    return (
-      <div>
-        <AppBar position="fixed">
-          <Toolbar>
-            <IconButton
-              color="inherit"
-              aria-label="open drawer"
-              onClick={this.handleDrawerOpen.bind(this)}
-              edge="start"
-              className={clsx(
-                classes.menuButton,
-                this.state.drawerOpen && classes.hide
-              )}
-            >
-              <MenuIcon />
-            </IconButton>
+  return (
+    <div>
+      <AppBar position="fixed">
+        <Toolbar>
+          <IconButton
+            color="inherit"
+            aria-label="open drawer"
+            onClick={handleDrawerOpen}
+            edge="start"
+            className={clsx(classes.menuButton, drawerOpen && classes.hide)}
+          >
+            <MenuIcon />
+          </IconButton>
+          <div className={drawerOpen ? classes.shift : null}>
             <Typography component="h1" variant="h5">
               Welcome To MultiModal Notation!
             </Typography>
-            <div style={{ position: "absolute", right: "2%" }}>
-              <Button
-                variant="outlined"
-                className="tutorial-button"
-                color="inherit"
-                // onClick={this.handleTutorialChange.bind(this)}
-              >
-                {/* Tutorial */}
-                <Link to="/tutorial" className="nav-link">
-                  Tutorial
-                </Link>
-              </Button>
-            </div>
-          </Toolbar>
-        </AppBar>
-        <Drawer
-          className={classes.drawer}
-          variant="persistent"
-          anchor="left"
-          open={this.state.drawerOpen}
-        >
-          <div className={classes.drawerHeader}>
-            <IconButton onClick={this.handleDrawerClose.bind(this)}>
-              {
-                //theme.direction === "ltr" ? (
-                <ChevronLeftIcon />
-                // ) : (
-                //   <ChevronRightIcon />
-                // )
-              }
-            </IconButton>
-          </div>
-          <Divider />
-          <Typography style={{ width: "300px" }}>{quickStartText}</Typography>
-        </Drawer>
-        <main
-          className={clsx(classes.content, {
-            [classes.contentShift]: this.state.drawerOpen,
-          })}
-        >
-          <div className={classes.root}>
-            <center>
-              <Dialog
-                onClose={this.handleTutorialChange.bind(this)}
-                maxWidth={"lg"}
-                fullWidth
-                TransitionComponent={Transition}
-                open={this.state.showTutorial}
-              >
-                <IconButton
-                  className={classes.closeButton}
-                  edge="start"
+            <div
+              style={{
+                position: "absolute",
+                right: "2%",
+                top: "20%",
+              }}
+            >
+              <Link to="/tutorial" className="nav-link">
+                <Button
+                  variant="outlined"
+                  className="tutorial-button"
                   color="inherit"
-                  onClick={this.handleTutorialChange.bind(this)}
-                  aria-label="close"
+                  // onClick={this.handleTutorialChange.bind(this)}
                 >
-                  <CloseIcon />
-                </IconButton>
-                <Tutorial />
-              </Dialog>
-            </center>
-            {/* 
+                  {/* Tutorial */}
+                  Tutorial
+                </Button>
+              </Link>
+            </div>
+          </div>
+        </Toolbar>
+      </AppBar>
+      <Drawer
+        className={classes.drawer}
+        variant="persistent"
+        anchor="left"
+        open={drawerOpen}
+      >
+        <div className={classes.drawerHeader}>
+          <Typography variant="h5">
+            <b>Quick Reference Guide</b>
+          </Typography>
+          <IconButton onClick={handleDrawerClose}>
+            <ChevronLeftIcon />
+          </IconButton>
+        </div>
+        <Divider />
+        <QuickStart />
+      </Drawer>
+      <main
+        className={clsx(classes.content, {
+          [classes.contentShift]: drawerOpen,
+        })}
+      >
+        <div className={classes.root}>
+          <center>
+            <Dialog
+              onClose={handleTutorialChange}
+              maxWidth={"lg"}
+              fullWidth
+              TransitionComponent={Transition}
+              open={showTutorial}
+            >
+              <IconButton
+                className={classes.closeButton}
+                edge="start"
+                color="inherit"
+                onClick={handleTutorialChange}
+                aria-label="close"
+              >
+                <CloseIcon />
+              </IconButton>
+              <Tutorial />
+            </Dialog>
+          </center>
+          {/* 
           <Grid
             container
             spacing={1}
@@ -615,8 +588,8 @@ class home extends Component {
                       />
                     </Grid>
                   </Grid> */}
-            {/* <button type="submit">Render</button> */}
-            {/* </div>
+          {/* <button type="submit">Render</button> */}
+          {/* </div>
               </form>
             </Grid>
             <Grid item xs={12} sm={6}>
@@ -632,7 +605,7 @@ class home extends Component {
           </Grid>
           <div style={{ margin: "1.69%" }}>
             <Typography>Music XML section</Typography> */}
-            {/* L:1/8 
+          {/* L:1/8 
 M:4/4 
 K:none 
 Q:1/4=128
@@ -643,7 +616,7 @@ M:4/4
 K:Bbmaj 
 Q:1/4=128
 g,g,f,f,C z1/2,F1/2,b,c',B z1/2,B z1/2,f,F z1/2,F z1/2,E,g2,g2,e,e,g,b,G z1/2,G z1/2,g,e',d',e',.D' g,g,f,f,C z1/2,F1/2,b,c',B z1/2,B z1/2,f,F z1/2,F z1/2,E,g2,g2,e,e,g,b,G z1/2,G z1/2,g,e',d',e',D' |]*/}
-            {/* <div
+          {/* <div
               className="controls"
               style={
                 this.state.musicxml ? { display: "block" } : { display: "none" }
@@ -693,8 +666,8 @@ g,g,f,f,C z1/2,F1/2,b,c',B z1/2,B z1/2,f,F z1/2,F z1/2,E,g2,g2,e,e,g,b,G z1/2,G 
                 <Grid>
                   <FormControl className={classes.formControl}>
                     <InputLabel>Instruments</InputLabel> */}
-            {/* <div style={{ height: "210px" }}> */}
-            {/* <Select
+          {/* <div style={{ height: "210px" }}> */}
+          {/* <Select
                       className={classes.selectInstrument}
                       onChange={this.handleInstrumentChange.bind(this)}
                     >
@@ -708,36 +681,62 @@ g,g,f,f,C z1/2,F1/2,b,c',B z1/2,B z1/2,f,F z1/2,F z1/2,E,g2,g2,e,e,g,b,G z1/2,G 
                 </Grid>
               </Grid>
             </div> */}
-            <br /> <br /> <br /> <br /> <br /> <br /> <br />
+          <br /> <br /> <br /> <br /> <br /> <br /> <br />
+          <div className={drawerOpen ? classes.shift : null}>
             <div className="container">
-              <form id="formID" onSubmit={this.handleFormSubmit}>
-                <textarea id="abc" cols="80" rows="15" spellcheck="false">
-                  {
+              <form id="formID" onSubmit={handleFormSubmit}>
+                <textarea
+                  className={classes.textArea}
+                  id="abc"
+                  cols="80"
+                  rows="15"
+                  spellCheck="false"
+                  onKeyDown={keydownHandler}
+                  onChange={handleTextChange}
+                  defaultValue={
                     "L:1/16 \nM:3/4 \nK:none \nQ:1/4=128 \nD,4 D,E,F,^G, z4 | E12 |]"
                   }
-                </textarea>
-                <button type="submit">Render</button>
+                ></textarea>
+                <br />
+
+                <Button
+                  type="submit"
+                  variant="outlined"
+                  className={classes.renderButton}
+                >
+                  Render
+                </Button>
+                <Button
+                  variant="outlined"
+                  onClick={print}
+                  className={classes.renderButton}
+                >
+                  Print
+                </Button>
               </form>
-              <div id="warnings"></div>
-              {/* <hr /> */}
+              {/* <div id="warnings"></div> */}
+              {errors ? (
+                errors.map((error, i) => (
+                  <div key={i}>
+                    <div>
+                      <Alert severity="error" open={true}>
+                        <AlertTitle>Error</AlertTitle>
+                        {error}
+                      </Alert>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <Typography></Typography>
+              )}
+
               <div id="paper"></div>
               <div id="audio"></div>
             </div>
-            {/* <div ref={this.paper} /> */}
-            {/* <Abcjs
-            abcNotation={
-              "X:1\nT:Example\nM:4/4\nC:Trad.\nK:G\n|:Gccc dedB|dedB dedB|c2ec B2dB|c2A2 A2BA|"
-            }
-            parserParams={{}}
-            engraverParams={{ responsive: "resize" }}
-            renderParams={{ viewportHorizontal: true }}
-          /> */}
-            {/* <div ref={this.osmdContainer} /> */}
-            {/* </div> */}
           </div>
-        </main>
-      </div>
-    );
-  }
-}
-export default withStyles(styles)(home);
+        </div>
+      </main>
+    </div>
+  );
+};
+export default withStyles(styles)(Home);
