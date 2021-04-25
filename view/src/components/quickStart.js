@@ -125,8 +125,6 @@ Bar Lines
 |: (vertical bar + colon) and  :| (colon + vertical bar) to denote a section to repeat (start and end respectively)
 || (vertical bar + vertical bar) final bar line
 || (vertical bar + vertical bar) or [| (open square bracket + vertical bar) or |] (vertical bar + close square bracket) for double bar line
-
-
 `;
 
 export default QuickStart;
