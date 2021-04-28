@@ -2,7 +2,8 @@ from flask import Flask, render_template, request, jsonify
 from music21 import converter, musicxml
 from music21.braille import translate
 
-app = Flask(__name__)
+app = Flask(__name__, static_folder='./view/build', static_url_path='/')
+
 
 braille = ""
 fragment = """
@@ -45,5 +46,14 @@ def convert_to_braille(userinput):
         braille = ""
 
 if __name__ == '__main__':
+    app.run(host='0.0.0.0', debug=False, port=os.environ.get('PORT', 5000))
     app.debug = True
-    app.run()
+    # app.run()
+
+@app.errorhandler(404)
+def not_found(e):
+    return app.send_static_file('index.html')
+
+@app.route('/')
+def index():
+    return app.send_static_file('index.html')
