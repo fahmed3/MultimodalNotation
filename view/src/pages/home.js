@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import TextField from "@material-ui/core/TextField";
 import CardContent from "@material-ui/core/CardContent";
 import Card from "@material-ui/core/Card";
@@ -39,9 +39,7 @@ import ChevronRightIcon from "@material-ui/icons/ChevronRight";
 import Divider from "@material-ui/core/Divider";
 import Alert from "@material-ui/lab/Alert";
 import AlertTitle from "@material-ui/lab/AlertTitle";
-
-import * as Tone from "tone";
-
+import axios from "axios";
 // import Abcjs from "react-abcjs";
 
 import * as ABCJS from "../abcjs/abcjs-basic";
@@ -75,6 +73,11 @@ const Home = (props) => {
   const [showTutorial, setShowTutorial] = useState(false);
   const [responsiveEditing, setResponsiveEditing] = useState(true);
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const [currabc, setCurrabc] = useState("");
+  const [isSpace, setIsSpace] = useState(false);
+
+  const containerRef = useRef();
+  const { current } = containerRef;
 
   const handleDrawerOpen = () => {
     setDrawerOpen(true);
@@ -270,17 +273,7 @@ const Home = (props) => {
     }
   };*/
 
-  // headers for key signature and all that stuff
-  // Volume setting
-  // Make a button to make expand the font size for the text editor
-  // Try to make a TextField onChange so that when the space bar is hit that it will play the inputted note
-  // Switch to make Midi editor like FL piano roll and export midi to musicXML
-  // https://github.com/paulrosen/abcjs
-  // https://www.npmjs.com/package/react-abcjs
-  // https://cdn.rawgit.com/paulrosen/abcjs/main/examples/editor.html
-
   let form = document.getElementById("formID");
-  // let braille_sect = document.getElementById("brailleSection");
   let textinput = document.getElementById("abc");
 
   const handleFormSubmit = (event, isArr = true) => {
@@ -292,25 +285,27 @@ const Home = (props) => {
       data = { userdata: event.target.value };
     }
 
-    fetch("/data", {
-      method: "POST",
-      body: JSON.stringify(data),
+    axios({
+      method: "post",
+      data: JSON.stringify(data),
+      url: "https://backend-multimodal.herokuapp.com/data",
       headers: {
         Accept: "application/json",
         "Content-Type": "application/json",
       },
-    }).then((res) => {
-      console.log("Request complete! response:", res);
-      fetch("/data")
-        .then((response) => {
-          return response.json();
-        })
-        .then((response) => {
-          setBraille(response["braille"]);
-          console.log(response["braille"]);
-        })
-        .catch((e) => console.log(e));
-    });
+    })
+      .then((response) => {
+        console.log("Request complete! response:", response);
+        if (response.data.error.length > 0) {
+          console.log("Error: ", response.data.error);
+          // setError() ? - any react stuff needed to display the error
+          // setBraille("");
+        } else {
+          console.log("Braille: ", response.data.braille);
+          setBraille(response.data.braille);
+        }
+      })
+      .catch((err) => console.log(err));
   };
 
   const keydownHandler = (event) => {
@@ -319,32 +314,6 @@ const Home = (props) => {
       handleFormSubmit(event, false);
     }
   };
-
-  const print = () => {
-    window.print();
-  };
-
-  // window.onload = function () {
-  //   abcjsEditor = new ABCJS.Editor("abc", {
-  //     canvas_id: "paper",
-  //     warnings_id: "warnings",
-  //     synth: {
-  //       el: "#audio",
-  //       options: {
-  //         displayLoop: true,
-  //         displayRestart: true,
-  //         displayPlay: true,
-  //         displayProgress: true,
-  //         displayWarp: true,
-  //       },
-  //     },
-  //     abcjsParams: {
-  //       add_classes: true,
-  //       clickListener: clickListener,
-  //     },
-  //     selectionChangeCallback: selectionChangeCallback,
-  //   });
-  // };
 
   useEffect(() => {
     setAbcjsEditor(
@@ -364,16 +333,20 @@ const Home = (props) => {
         abcjsParams: {
           add_classes: true,
           clickListener: clickListener,
+          afterParsing: afterParsingCallback,
         },
         selectionChangeCallback: selectionChangeCallback,
       })
     );
-  }, []);
+  }, [current]);
 
-  const handleTextChange = () => {
-    console.log(errors);
+  const handleTextChange = (event) => {
+    // console.log(errors);
     setErrors(abcjsEditor.warnings);
-    console.log(abcjsEditor);
+    setIsSpace(event.keyCode === 32);
+    setCurrabc(event.target.value);
+
+    // console.log(abcjsEditor);
   };
 
   function clickListener(
@@ -394,51 +367,63 @@ const Home = (props) => {
         abcjsEditor.millisecondsPerMeasure()
       )
       .then(function (response) {
-        console.log("note played");
+        // console.log("note played");
       })
       .catch(function (error) {
         console.log("error playing note", error);
       });
   }
 
-  // function selectionChangeCallback(start, end) {
-  //   if (abcjsEditor) {
-  //     var el = abcjsEditor.tunes[0].getElementFromChar(start);
-  //     if (!el) return;
-  //     console.log(el);
-  //   }
-  // }
-
-  var lastNote = [];
-
   function selectionChangeCallback(start, end) {
     if (abcjsEditor) {
+      // console.log("abcjseditor ", abcjsEditor);
       var el = abcjsEditor.tunes[0].getElementFromChar(start);
-
       if (!el) return;
+    }
+  }
 
-      //abcjs source code
-      var lastClicked = el.midiPitches;
-      if (!lastClicked) return; // returns when play button hasnt been pressed yet
-      // synth not initialized yet?
+  // console.log(textinput);
+  if (textinput) {
+    var initabc = textinput.value.split(" ").join("");
+  }
+  function afterParsingCallback(tune, tuneNumber, abcString) {
+    if (abcjsEditor) {
+      // console.log("afterparsing ", abcjsEditor);
 
-      // if (lastClicked != lastNote) {
-      //only plays if cursor moves to new note
+      var start = abcjsEditor.editarea.getSelection().start - 1;
+      var el = tune.getElementFromChar(start);
+      // console.log(tune)
+      // // setCurrabc(abcjsEditor.currentAbc.split(" ").join(""));
+      // console.log("current abc: ", currabc);
+      // console.log("initial abc: ", initabc);
+      if (/*initabc.length >= currabc.length || */ !el) {
+        // if deleting and adding at same time (replaces highlighted text w/ new letter), ignores adding - fix later
+        // initabc = currabc;
+        // // console.log(el);
+        return;
+      }
+      // initabc = currabc;
+      setTimeout(() => {
+        var lastClicked = el.midiPitches;
+        // console.log("last", Object.keys(el));
+        console.log(lastClicked);
+        if (!lastClicked) return;
+        if (isSpace) return;
 
-      console.log(lastClicked);
-      ABCJS.synth
-        .playEvent(
-          lastClicked,
-          el.midiGraceNotePitches,
-          abcjsEditor.millisecondsPerMeasure()
-        )
-        .then(function (response) {
-          console.log("note played");
-          lastNote = lastClicked;
-        })
-        .catch(function (error) {
-          console.log("error playing note", error);
-        });
+        ABCJS.synth
+          .playEvent(
+            lastClicked,
+            el.midiGraceNotePitches,
+            abcjsEditor.millisecondsPerMeasure()
+          )
+          .then(function (response) {
+            console.log("note played");
+          })
+          .catch(function (error) {
+            console.log("error playing note", error);
+          });
+      }, 300);
+      initabc = currabc;
     }
   }
 
@@ -471,7 +456,6 @@ const Home = (props) => {
                   variant="outlined"
                   className="tutorial-button"
                   color="inherit"
-                  // onClick={this.handleTutorialChange.bind(this)}
                 >
                   {/* Tutorial */}
                   Tutorial
@@ -684,38 +668,51 @@ g,g,f,f,C z1/2,F1/2,b,c',B z1/2,B z1/2,f,F z1/2,F z1/2,E,g2,g2,e,e,g,b,G z1/2,G 
           <br /> <br /> <br /> <br /> <br /> <br /> <br />
           <div className={drawerOpen ? classes.shift : null}>
             <div className="container">
-              <form id="formID" onSubmit={handleFormSubmit}>
-                <textarea
-                  className={classes.textArea}
-                  id="abc"
-                  cols="80"
-                  rows="15"
-                  spellCheck="false"
-                  onKeyDown={keydownHandler}
-                  onChange={handleTextChange}
-                  defaultValue={
-                    "L:1/16 \nM:3/4 \nK:none \nQ:1/4=128 \nD,4 D,E,F,^G, z4 | E12 |]"
-                  }
-                ></textarea>
-                <br />
+              <Grid container direction="row">
+                <Grid item>
+                  <form id="formID" onSubmit={handleFormSubmit}>
+                    <textarea
+                      ref={containerRef}
+                      className={classes.textArea}
+                      id="abc"
+                      cols="80"
+                      rows="15"
+                      spellCheck="false"
+                      onKeyDown={keydownHandler}
+                      onChange={handleTextChange}
+                      defaultValue={
+                        "L:1/16 \nM:3/4 \nK:none \nQ:1/4=128 \nD,4 D,E,F,^G, z4 | E12 |]"
+                      }
+                    ></textarea>
+                    <br />
 
-                <Button
-                  type="submit"
-                  variant="outlined"
-                  className={classes.renderButton}
-                >
-                  Render
-                </Button>
-                <Button
-                  variant="outlined"
-                  onClick={print}
-                  className={classes.renderButton}
-                >
-                  Print
-                </Button>
-              </form>
-              {/* <div id="warnings"></div> */}
-              {errors ? (
+                    <Button
+                      type="submit"
+                      variant="outlined"
+                      className={classes.renderButton}
+                    >
+                      Render
+                    </Button>
+                  </form>
+                </Grid>
+
+                <Grid item style={{ marginLeft: "50px", marginTop: "-5px" }}>
+                  <div>
+                    <Card
+                      variant="outlined"
+                      fullWidth
+                      className={classes.braille}
+                    >
+                      <CardContent>
+                        <Typography>Braille Output</Typography>
+                        <Typography>{braille}</Typography>
+                      </CardContent>
+                    </Card>
+                  </div>
+                </Grid>
+              </Grid>
+              <Typography id="warnings"></Typography>
+              {/* {errors ? (
                 errors.map((error, i) => (
                   <div key={i}>
                     <div>
@@ -728,11 +725,11 @@ g,g,f,f,C z1/2,F1/2,b,c',B z1/2,B z1/2,f,F z1/2,F z1/2,E,g2,g2,e,e,g,b,G z1/2,G 
                 ))
               ) : (
                 <Typography></Typography>
-              )}
-
-              <div id="paper"></div>
-              <div id="audio"></div>
+              )} */}
             </div>
+            <div id="paper"></div>
+            <div id="audio"></div>
+            {/* document.getElementsByClassName('abcjs-midi-start abcjs-btn')[0].click(); */}
           </div>
         </div>
       </main>
