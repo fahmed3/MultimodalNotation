@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState, useRef, useCallback } from "react";
 import TextField from "@material-ui/core/TextField";
 import CardContent from "@material-ui/core/CardContent";
 import Card from "@material-ui/core/Card";
@@ -75,6 +75,7 @@ const Home = (props) => {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [currabc, setCurrabc] = useState("");
   const [isSpace, setIsSpace] = useState(false);
+  const [tune, setTune] = useState({});
 
   const containerRef = useRef();
   const { current } = containerRef;
@@ -386,30 +387,88 @@ const Home = (props) => {
   if (textinput) {
     var initabc = textinput.value.split(" ").join("");
   }
-  function afterParsingCallback(tune, tuneNumber, abcString) {
-    if (abcjsEditor) {
-      // console.log("afterparsing ", abcjsEditor);
+  // function afterParsingCallback(tune, tuneNumber, abcString) {
+  //   setTune(tune);
+  //   if (abcjsEditor) {
+  //     console.log("afterparsing ", tune);
 
+  //     var start = abcjsEditor.editarea.getSelection().start - 1;
+  //     var el = tune.getElementFromChar(start);
+  //     // console.log(tune)
+  //     // // setCurrabc(abcjsEditor.currentAbc.split(" ").join(""));
+  //     // console.log("current abc: ", currabc);
+  //     // console.log("initial abc: ", initabc);
+  //     if (/*initabc.length >= currabc.length || */ !el) {
+  //       // if deleting and adding at same time (replaces highlighted text w/ new letter), ignores adding - fix later
+  //       // initabc = currabc;
+  //       // // console.log(el);
+  //       return;
+  //     }
+  //     // initabc = currabc;
+  //     setTimeout(() => {
+  //       var lastClicked = el.midiPitches;
+  //       // console.log("last", Object.keys(el));
+  //       console.log(lastClicked);
+  //       if (!lastClicked) return;
+  //       if (isSpace) return;
+
+  //       ABCJS.synth
+  //         .playEvent(
+  //           lastClicked,
+  //           el.midiGraceNotePitches,
+  //           abcjsEditor.millisecondsPerMeasure()
+  //         )
+  //         .then(function (response) {
+  //           console.log("note played");
+  //         })
+  //         .catch(function (error) {
+  //           console.log("error playing note", error);
+  //         });
+  //     }, 300);
+  //     initabc = currabc;
+  //   }
+  // }
+
+  function afterParsingCallback(tune, tuneNumber, abcString) {
+    setTune(tune);
+    console.log(abcString);
+    if (abcjsEditor) {
+      // console.log("abcjseditor ", abcjsEditor);
       var start = abcjsEditor.editarea.getSelection().start - 1;
+      console.log(start);
       var el = tune.getElementFromChar(start);
-      // console.log(tune)
-      // // setCurrabc(abcjsEditor.currentAbc.split(" ").join(""));
+
+      setCurrabc(abcjsEditor.currentAbc.split(" ").join(""));
+      console.log(
+        abcString.substring(
+          abcjsEditor.editarea.getSelection().start - 1,
+          abcjsEditor.editarea.getSelection().end
+        )
+      );
+
       // console.log("current abc: ", currabc);
       // console.log("initial abc: ", initabc);
-      if (/*initabc.length >= currabc.length || */ !el) {
-        // if deleting and adding at same time (replaces highlighted text w/ new letter), ignores adding - fix later
-        // initabc = currabc;
-        // // console.log(el);
+      if (
+        abcString.substring(
+          abcjsEditor.editarea.getSelection().start - 1,
+          abcjsEditor.editarea.getSelection().end
+        ) === " "
+      ) {
         return;
       }
-      // initabc = currabc;
+      if (initabc.length >= abcString.length || !el) {
+        // if deleting and adding at same time (replaces highlighted text w/ new letter), ignores adding - fix later
+        console.log("current abc: ", abcString);
+        console.log("initial abc: ", initabc);
+        initabc = abcString;
+        return;
+      }
+      initabc = abcString;
       setTimeout(() => {
         var lastClicked = el.midiPitches;
         // console.log("last", Object.keys(el));
-        console.log(lastClicked);
         if (!lastClicked) return;
-        if (isSpace) return;
-
+        // console.log("hello");
         ABCJS.synth
           .playEvent(
             lastClicked,
@@ -423,7 +482,6 @@ const Home = (props) => {
             console.log("error playing note", error);
           });
       }, 300);
-      initabc = currabc;
     }
   }
 
