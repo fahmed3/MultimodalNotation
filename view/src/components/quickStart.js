@@ -8,6 +8,18 @@ const QuickStart = (props) => {
   return (
     <div style={{ margin: "20px" }}>
       <div style={{ width: "300px" }}>
+        <Typography variant="h5">Short Cuts</Typography>
+        <Divider />
+        <Typography>
+          <br />
+          When focused in the text-editing area
+          <List>
+            <ListItem>Ctrl + Enter = Render</ListItem>
+            <ListItem>Ctrl + 0 = Play/Pause</ListItem>
+            <ListItem>Ctrl + / = Reset to beginning</ListItem>
+            <ListItem>Ctrl + . = Loop</ListItem>
+          </List>
+        </Typography>
         <Typography variant="h5">Headers</Typography>
         <Divider />
         <Typography>
@@ -27,7 +39,7 @@ const QuickStart = (props) => {
         <Typography>
           <List>
             <ListItem>CDEFGAB are the available notes </ListItem>
-            <ListItem> C is C4 (Capital letters begin at octave 4) </ListItem>
+            <ListItem>C is C4 (Capital letters begin at octave 4) </ListItem>
             <ListItem>c is C5 (Lowercase letters begin at octave 5)</ListItem>
             <ListItem>‘ (apostrophe) increment the octave</ListItem>
             <ListItem>, (comma) decrement the octave</ListItem>
