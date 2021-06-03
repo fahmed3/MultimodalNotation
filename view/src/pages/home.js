@@ -218,11 +218,11 @@ const Home = (props) => {
   }
 
   /*defaultValue="
-  L:1/8
-  M:4/4
-  K:Bbmaj
-  Q:1/4=128
-  G G F F C z1/2 F1/2, B c | B z1/2 B z1/2 F F z1/2 F z1/2 E, | G2 G2 E E G B | G z1/2 G z1/2 G e d e .d |]
+L:1/8
+M:4/4
+K:Bbmaj
+Q:1/4=128
+G G F F C z1/2 F1/2, B c | B z1/2 B z1/2 F F z1/2 F z1/2 E, | G2 G2 E E G B | G z1/2 G z1/2 G e d e .d |]
   "
 */
   return (
